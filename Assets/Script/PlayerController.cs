@@ -22,7 +22,6 @@ public class PlayerController : MonoBehaviour
     public int level = 1;
     public int exp = 0;
     public int expToNextLevel = 100;
-
     public int coins = 0;
 
     private SpriteRenderer spriteRenderer;
@@ -30,6 +29,10 @@ public class PlayerController : MonoBehaviour
     public Text coinText;
     public Text levelText;
     public Text expText;
+
+    public GameObject shieldPrefab;
+    public GameObject aoeDamagePrefab;
+    private bool hasShield = false;
 
     void Start()
     {
@@ -54,6 +57,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError("SQLiteAdapter is not assigned in the scene.");
         }
+
         UpdateLevelUI();
     }
 
@@ -91,6 +95,12 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (hasShield)
+        {
+            hasShield = false;
+            return;
+        }
+
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
@@ -115,8 +125,6 @@ public class PlayerController : MonoBehaviour
         {
             healthBar.SetHealth(currentHealth);
         }
-
-        Debug.Log("Healed: " + amount);
     }
 
     private void Die()
@@ -142,20 +150,35 @@ public class PlayerController : MonoBehaviour
         maxHealth += 20;
         currentHealth = maxHealth;
         damage += 5;
-        Debug.Log("Level Up! New Level: " + level);
+
+        if (level == 3)
+        {
+            UnlockAOEDamage();
+        }
+        else if (level == 5)
+        {
+            StartCoroutine(ActivateShield());
+        }
+        else if (level == 7)
+        {
+            damage += 10;
+        }
+
         UpdateLevelUI();
     }
 
-    private void UpdateLevelUI()
+    private void UnlockAOEDamage()
     {
-        if (levelText != null)
-        {
-            levelText.text = "Level: " + level;
-        }
-        if (expText != null)
-        {
-            expText.text = "EXP: " + exp + " / " + expToNextLevel;
-        }
+        Instantiate(aoeDamagePrefab, transform.position, Quaternion.identity);
+    }
+
+    private IEnumerator ActivateShield()
+    {
+        hasShield = true;
+        GameObject shield = Instantiate(shieldPrefab, transform.position, Quaternion.identity, transform);
+        yield return new WaitForSeconds(10);
+        hasShield = false;
+        Destroy(shield);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -169,10 +192,9 @@ public class PlayerController : MonoBehaviour
         if (collision.CompareTag("Coin"))
         {
             coins++;
-            Debug.Log("Coins: " + coins);
-            Destroy(collision.gameObject);
             UpdateCoinUI();
             UpdateCoinDatabase();
+            Destroy(collision.gameObject);
         }
     }
 
@@ -201,6 +223,18 @@ public class PlayerController : MonoBehaviour
         if (sqliteAdapter != null)
         {
             sqliteAdapter.UpdateCoinsInDatabase(coins);
+        }
+    }
+
+    private void UpdateLevelUI()
+    {
+        if (levelText != null)
+        {
+            levelText.text = "Level: " + level.ToString();
+        }
+        if (expText != null)
+        {
+            expText.text = "EXP: " + exp.ToString() + "/" + expToNextLevel.ToString();
         }
     }
 
