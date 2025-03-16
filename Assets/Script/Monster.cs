@@ -84,7 +84,7 @@ public class Monster : MonoBehaviour
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
-            player.GainEXP(10); // EXP 50 หรือเปลี่ยนเป็นค่าที่ต้องการ
+            player.GainEXP(50); // EXP 50 หรือเปลี่ยนเป็นค่าที่ต้องการ
         }
 
         // ดรอปเหรียญ
@@ -100,5 +100,4 @@ public class Monster : MonoBehaviour
         // ทำลาย GameObject ของมอนสเตอร์
         Destroy(gameObject);
     }
-
 }

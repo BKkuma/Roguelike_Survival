@@ -32,7 +32,21 @@ public class PlayerController : MonoBehaviour
 
     public GameObject shieldPrefab;
     public GameObject aoeDamagePrefab;
+    public GameObject singleTargetEffectPrefab;
+
     private bool hasShield = false;
+
+    private float shieldCooldown = 10f;
+    private float shieldDuration = 7f;
+    private float aoeCooldown = 5f;
+    private float singleCooldown = 2f;
+    private float shieldTimer = 0f;
+    private float aoeTimer = 0f;
+    private float singleTimer = 0f;
+
+    public float aoeRadius = 5f;
+    public float singlrRadius = 10f;
+    public int aoeDamage = 5;
 
     void Start()
     {
@@ -71,6 +85,30 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(Dash());
         }
+
+        shieldTimer += Time.deltaTime;
+        aoeTimer += Time.deltaTime;
+        singleTimer += Time.deltaTime;
+
+        // ตรวจสอบ AOE
+        if (level >= 7 && aoeTimer >= aoeCooldown)
+        {
+            ActivateAOEDamage(); // ใช้ AOE เมื่อเงื่อนไขครบ
+            aoeTimer = 0f;
+        }
+
+        // ตรวจสอบ Shield
+        if (level >= 5 && shieldTimer >= shieldCooldown)
+        {
+            StartCoroutine(ActivateShield());
+            shieldTimer = 0f;
+        }
+
+        if (level >= 3 && singleTimer >= singleCooldown)
+        {
+            ActivateSingleTargetDamage();
+            singleTimer = 0f;
+        }
     }
 
     void FixedUpdate()
@@ -97,10 +135,8 @@ public class PlayerController : MonoBehaviour
     {
         if (hasShield)
         {
-            hasShield = false;
             return;
         }
-
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
@@ -146,37 +182,122 @@ public class PlayerController : MonoBehaviour
     {
         level++;
         exp -= expToNextLevel;
-        expToNextLevel += 50;
         maxHealth += 20;
         currentHealth = maxHealth;
         damage += 5;
 
-        if (level == 3)
-        {
-            UnlockAOEDamage();
-        }
-        else if (level == 5)
-        {
-            StartCoroutine(ActivateShield());
-        }
-        else if (level == 7)
-        {
-            damage += 10;
-        }
-
         UpdateLevelUI();
     }
 
-    private void UnlockAOEDamage()
+    // AOE Damage Function (Level 7)
+    // Single Target Damage Function (Level 3)
+    private void ActivateSingleTargetDamage()
     {
-        Instantiate(aoeDamagePrefab, transform.position, Quaternion.identity);
+        if (level < 3)  // ใช้เงื่อนไขที่ Level 3
+        {
+            Debug.Log("Level 3 not reached, skipping Single Target Damage.");
+            return;
+        }
+
+        Debug.Log("Activating Single Target Damage Effect...");
+
+        // ตรวจสอบมอนสเตอร์ในระยะที่กำหนด
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, singlrRadius);
+
+        if (enemies.Length > 0)
+        {
+            // เลือกมอนสเตอร์ที่อยู่ในวง
+            Collider2D selectedEnemy = null;
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy.CompareTag("Monster"))
+                {
+                    // เช็คว่า monster อยู่ในวงจริง ๆ
+                    Vector2 directionToMonster = enemy.transform.position - transform.position;
+                    float distanceToMonster = directionToMonster.magnitude;
+
+                    if (distanceToMonster <= singlrRadius)
+                    {
+                        selectedEnemy = enemy;
+                        break;  // เลือกมอนสเตอร์ที่อยู่ในระยะ
+                    }
+                }
+            }
+
+            if (selectedEnemy != null)
+            {
+                Monster monster = selectedEnemy.GetComponent<Monster>();
+                if (monster != null)
+                {
+                    // สุ่มดาเมจ
+                    int randomDamage = Random.Range(20, 50); // ปรับช่วงของดาเมจ
+                    monster.TakeDamage(randomDamage);
+
+                    // สร้าง Single Target Effect
+                    Instantiate(singleTargetEffectPrefab, selectedEnemy.transform.position, Quaternion.identity);
+                    Debug.Log("Single Target - Monster damaged: " + randomDamage + " at position: " + selectedEnemy.transform.position);
+                }
+            }
+            else
+            {
+                Debug.Log("No valid monster found in range.");
+            }
+        }
+        else
+        {
+            Debug.Log("No monsters detected in range.");
+        }
     }
+
+
+    // AOE Damage Function (Level 7)
+    private void ActivateAOEDamage()
+{
+    if (level < 7)  // ใช้เงื่อนไขที่ Level 7
+    {
+        Debug.Log("Level 7 not reached, skipping AOE Damage.");
+        return;
+    }
+
+    Debug.Log("Activating AOE Damage Effect...");
+
+    // ตรวจสอบมอนสเตอร์ในระยะที่กำหนด
+    Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+
+    if (enemies.Length > 0)
+    {
+        foreach (Collider2D enemy in enemies)
+        {
+            if (enemy.CompareTag("Monster"))
+            {
+                Monster monster = enemy.GetComponent<Monster>();
+                if (monster != null)
+                {
+                    // สุ่มดาเมจ
+                    int randomDamage = Random.Range(10, 30); // ปรับดาเมจให้เหมาะสมกับ AOE
+                    monster.TakeDamage(randomDamage);
+
+                    // สร้าง AOE Effect
+                    Instantiate(aoeDamagePrefab, enemy.transform.position, Quaternion.identity);
+                    Debug.Log("AOE - Monster damaged: " + randomDamage + " at position: " + enemy.transform.position);
+                }
+            }
+        }
+    }
+    else
+    {
+        Debug.Log("No monsters detected in AOE range.");
+    }
+}
+
+
 
     private IEnumerator ActivateShield()
     {
         hasShield = true;
         GameObject shield = Instantiate(shieldPrefab, transform.position, Quaternion.identity, transform);
-        yield return new WaitForSeconds(10);
+        yield return new WaitForSeconds(shieldDuration);
         hasShield = false;
         Destroy(shield);
     }
@@ -238,16 +359,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void DisconnectDatabase()
+    void OnDrawGizmosSelected()
     {
-        if (sqliteAdapter != null)
-        {
-            sqliteAdapter.DisconnectDatabase();
-        }
-    }
-
-    private void OnApplicationQuit()
-    {
-        DisconnectDatabase();
+        // แสดง Gizmo สำหรับ AOE Radius
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, aoeRadius);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, singlrRadius);
+        
     }
 }

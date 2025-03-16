@@ -6,14 +6,20 @@ public class Projectile : MonoBehaviour
 {
     public float speed = 10f;
     public int damage;
+    public bool isSpecialBullet = false; // เพิ่มตัวแปรเช็คกระสุนพิเศษ
 
     void Start()
     {
-        // ดึงค่า damage จาก Player
+        // ดึงค่า damage จาก Player หรือจากค่าที่กำหนด
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
             damage = player.damage;
+        }
+
+        if (isSpecialBullet) // ถ้าเป็นกระสุนพิเศษ
+        {
+            damage *= 2;  // เพิ่มดาเมจ 2 เท่า
         }
 
         GetComponent<Rigidbody2D>().velocity = transform.right * speed;
@@ -37,5 +43,3 @@ public class Projectile : MonoBehaviour
         Destroy(gameObject);
     }
 }
-
-

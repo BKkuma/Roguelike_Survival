@@ -180,7 +180,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
     m_FontSize: 36
     m_FontStyle: 0
     m_BestFit: 0
@@ -511,7 +511,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
     m_FontSize: 36
     m_FontStyle: 0
     m_BestFit: 0
@@ -6462,6 +6462,12 @@ MonoBehaviour:
   coinText: {fileID: 117525581}
   levelText: {fileID: 84423280}
   expText: {fileID: 304904052}
+  shieldPrefab: {fileID: 8709328492080256833, guid: 06f05f8bbd2fe2a4392717e4d1c67738, type: 3}
+  aoeDamagePrefab: {fileID: 1247311384876784, guid: 4adffb0018aeda44e9263f901167af1f, type: 3}
+  singleTargetEffectPrefab: {fileID: 3096929026833759461, guid: 4b5fbf1c1835ec74dbb48b16a00e1793, type: 3}
+  aoeRadius: 3
+  singlrRadius: 7
+  aoeDamage: 5
 --- !u!50 &1130909330
 Rigidbody2D:
   serializedVersion: 4
@@ -6550,7 +6556,7 @@ Transform:
   m_GameObject: {fileID: 1130909328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
