@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
 
     private bool hasShield = false;
 
-    private float shieldCooldown = 10f;
+    private float shieldCooldown = 20f;
     private float shieldDuration = 7f;
     private float aoeCooldown = 5f;
     private float singleCooldown = 2f;
@@ -47,6 +47,9 @@ public class PlayerController : MonoBehaviour
     public float aoeRadius = 5f;
     public float singlrRadius = 10f;
     public int aoeDamage = 5;
+
+    private float playTime = 0f; 
+    public int leveltext = 1;
 
     void Start()
     {
@@ -109,6 +112,7 @@ public class PlayerController : MonoBehaviour
             ActivateSingleTargetDamage();
             singleTimer = 0f;
         }
+        playTime += Time.deltaTime;
     }
 
     void FixedUpdate()
@@ -165,7 +169,14 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Debug.Log("Player Dead!");
+
+        // บันทึกเวลาเล่นและเลเวลล่าสุด
+        PlayerPrefs.SetFloat("FinalTime", playTime);
+        PlayerPrefs.SetInt("FinalLevel", level);
+
+        // โหลดฉากจบ
+        SceneManager.LoadScene("EndGameScene");
     }
 
     public void GainEXP(int amount)
