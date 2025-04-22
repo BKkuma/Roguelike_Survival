@@ -185,11 +185,14 @@ public class PlayerController : MonoBehaviour
     {
         level++;
         exp -= expToNextLevel;
+
+        expToNextLevel = Mathf.FloorToInt(expToNextLevel * 1.2f); // เพิ่ม EXP ที่ต้องใช้สำหรับเลเวลถัดไป
+
         maxHealth += 20;
         currentHealth = maxHealth;
-        // damage จะไม่เพิ่มโดยอัตโนมัติอีกต่อไป
         UpdateLevelUI();
     }
+
 
     private void ActivateSingleTargetDamage()
     {
