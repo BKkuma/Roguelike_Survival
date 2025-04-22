@@ -293,7 +293,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 7.149597, y: -57.5495}
-  m_SizeDelta: {x: 172.5008, y: 44.901}
+  m_SizeDelta: {x: 276.849, y: 44.901}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &84423280
 MonoBehaviour:
@@ -322,7 +322,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
-    m_Alignment: 4
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -6600,9 +6600,10 @@ MonoBehaviour:
   coinText: {fileID: 117525581}
   levelText: {fileID: 84423280}
   expText: {fileID: 304904052}
-  shieldPrefab: {fileID: 8709328492080256833, guid: 06f05f8bbd2fe2a4392717e4d1c67738, type: 3}
   aoeDamagePrefab: {fileID: 1247311384876784, guid: 4adffb0018aeda44e9263f901167af1f, type: 3}
   singleTargetEffectPrefab: {fileID: 100006, guid: 60bc526f4be1e044ab9e46340b82ffb3, type: 3}
+  dpsAuraEffectPrefab: {fileID: 8709328492080256833, guid: 06f05f8bbd2fe2a4392717e4d1c67738, type: 3}
+  healEffectPrefab: {fileID: 100004, guid: 3af6f68141914ca43ba39b2403757bd0, type: 3}
   aoeRadius: 3
   singlrRadius: 7
   aoeDamage: 5

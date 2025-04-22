@@ -37,9 +37,26 @@ public class MonsterSpawner : MonoBehaviour
     private void SpawnMonster()
     {
         Vector3 spawnPosition = GetRandomPositionOutsideCamera();
-        Instantiate(monsterPrefab, spawnPosition, Quaternion.identity);
+        GameObject monsterGO = Instantiate(monsterPrefab, spawnPosition, Quaternion.identity);
         currentMonsterCount++;
+
+        // เพิ่มความสามารถให้มอนสเตอร์ตามเลเวลผู้เล่น
+        PlayerController player = FindObjectOfType<PlayerController>();
+        if (player != null)
+        {
+            Monster monster = monsterGO.GetComponent<Monster>();
+            if (monster != null)
+            {
+                int playerLevel = player.level;
+
+                // ตัวอย่างการสเกล
+                monster.health += playerLevel * 10;   // เพิ่ม HP ตามเลเวล
+                monster.damage += playerLevel * 2;    // เพิ่มดาเมจตามเลเวล
+                
+            }
+        }
     }
+
 
     private Vector3 GetRandomPositionOutsideCamera()
     {

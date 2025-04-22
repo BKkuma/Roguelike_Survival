@@ -171,6 +171,7 @@ MonoBehaviour:
   speed: 2
   damage: 10
   damageInterval: 1
+  damageTextPrefab: {fileID: 1125036578152362854, guid: 8d888f1cf09a5f74b8a803b57f2faf2d, type: 3}
 --- !u!114 &5459786509821657211
 MonoBehaviour:
   m_ObjectHideFlags: 0

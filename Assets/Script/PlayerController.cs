@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 movement;
     private SQLiteAdapter sqliteAdapter;
 
+
     public int maxHealth = 100;
     public int currentHealth;
     public int damage = 10;
@@ -30,25 +31,27 @@ public class PlayerController : MonoBehaviour
     public Text levelText;
     public Text expText;
 
-    public GameObject shieldPrefab;
     public GameObject aoeDamagePrefab;
     public GameObject singleTargetEffectPrefab;
+    public GameObject dpsAuraEffectPrefab;
 
-    private bool hasShield = false;
-
-    private float shieldCooldown = 20f;
-    private float shieldDuration = 7f;
     private float aoeCooldown = 5f;
     private float singleCooldown = 2f;
-    private float shieldTimer = 0f;
+    private float dpsCooldown = 20f;
+    private float dpsDuration = 7f;
+
     private float aoeTimer = 0f;
     private float singleTimer = 0f;
+    private float dpsTimer = 0f;
+
+    private GameObject activeAuraEffect;
+    public GameObject healEffectPrefab;
 
     public float aoeRadius = 5f;
     public float singlrRadius = 10f;
     public int aoeDamage = 5;
 
-    private float playTime = 0f; 
+    private float playTime = 0f;
     public int leveltext = 1;
 
     void Start()
@@ -89,22 +92,20 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(Dash());
         }
 
-        shieldTimer += Time.deltaTime;
         aoeTimer += Time.deltaTime;
         singleTimer += Time.deltaTime;
+        dpsTimer += Time.deltaTime;
 
-        // ตรวจสอบ AOE
         if (level >= 7 && aoeTimer >= aoeCooldown)
         {
-            ActivateAOEDamage(); // ใช้ AOE เมื่อเงื่อนไขครบ
+            ActivateAOEDamage();
             aoeTimer = 0f;
         }
 
-        // ตรวจสอบ Shield
-        if (level >= 5 && shieldTimer >= shieldCooldown)
+        if (level >= 5 && dpsTimer >= dpsCooldown)
         {
-            StartCoroutine(ActivateShield());
-            shieldTimer = 0f;
+            StartCoroutine(ActivateDPSAura());
+            dpsTimer = 0f;
         }
 
         if (level >= 3 && singleTimer >= singleCooldown)
@@ -112,6 +113,7 @@ public class PlayerController : MonoBehaviour
             ActivateSingleTargetDamage();
             singleTimer = 0f;
         }
+
         playTime += Time.deltaTime;
     }
 
@@ -137,10 +139,6 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (hasShield)
-        {
-            return;
-        }
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
@@ -170,12 +168,8 @@ public class PlayerController : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player Dead!");
-
-        // บันทึกเวลาเล่นและเลเวลล่าสุด
         PlayerPrefs.SetFloat("FinalTime", playTime);
         PlayerPrefs.SetInt("FinalLevel", level);
-
-        // โหลดฉากจบ
         SceneManager.LoadScene("EndGameScene");
     }
 
@@ -196,42 +190,30 @@ public class PlayerController : MonoBehaviour
         maxHealth += 20;
         currentHealth = maxHealth;
         damage += 5;
-
         UpdateLevelUI();
     }
 
-    // AOE Damage Function (Level 7)
-    // Single Target Damage Function (Level 3)
     private void ActivateSingleTargetDamage()
     {
-        if (level < 3)  // ใช้เงื่อนไขที่ Level 3
-        {
-            Debug.Log("Level 3 not reached, skipping Single Target Damage.");
-            return;
-        }
+        if (level < 3) return;
 
-        Debug.Log("Activating Single Target Damage Effect...");
-
-        // ตรวจสอบมอนสเตอร์ในระยะที่กำหนด
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, singlrRadius);
 
         if (enemies.Length > 0)
         {
-            // เลือกมอนสเตอร์ที่อยู่ในวง
             Collider2D selectedEnemy = null;
 
             foreach (var enemy in enemies)
             {
                 if (enemy.CompareTag("Monster"))
                 {
-                    // เช็คว่า monster อยู่ในวงจริง ๆ
                     Vector2 directionToMonster = enemy.transform.position - transform.position;
                     float distanceToMonster = directionToMonster.magnitude;
 
                     if (distanceToMonster <= singlrRadius)
                     {
                         selectedEnemy = enemy;
-                        break;  // เลือกมอนสเตอร์ที่อยู่ในระยะ
+                        break;
                     }
                 }
             }
@@ -241,43 +223,20 @@ public class PlayerController : MonoBehaviour
                 Monster monster = selectedEnemy.GetComponent<Monster>();
                 if (monster != null)
                 {
-                    // สุ่มดาเมจ
-                    int randomDamage = Random.Range(20, 50); // ปรับช่วงของดาเมจ
+                    int randomDamage = Random.Range(20, 50);
                     monster.TakeDamage(randomDamage);
-
-                    // สร้าง Single Target Effect
                     Instantiate(singleTargetEffectPrefab, selectedEnemy.transform.position, Quaternion.identity);
-                    Debug.Log("Single Target - Monster damaged: " + randomDamage + " at position: " + selectedEnemy.transform.position);
                 }
             }
-            else
-            {
-                Debug.Log("No valid monster found in range.");
-            }
-        }
-        else
-        {
-            Debug.Log("No monsters detected in range.");
         }
     }
 
-
-    // AOE Damage Function (Level 7)
     private void ActivateAOEDamage()
-{
-    if (level < 7)  // ใช้เงื่อนไขที่ Level 7
     {
-        Debug.Log("Level 7 not reached, skipping AOE Damage.");
-        return;
-    }
+        if (level < 7) return;
 
-    Debug.Log("Activating AOE Damage Effect...");
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
 
-    // ตรวจสอบมอนสเตอร์ในระยะที่กำหนด
-    Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
-
-    if (enemies.Length > 0)
-    {
         foreach (Collider2D enemy in enemies)
         {
             if (enemy.CompareTag("Monster"))
@@ -285,32 +244,64 @@ public class PlayerController : MonoBehaviour
                 Monster monster = enemy.GetComponent<Monster>();
                 if (monster != null)
                 {
-                    // สุ่มดาเมจ
-                    int randomDamage = Random.Range(10, 30); // ปรับดาเมจให้เหมาะสมกับ AOE
+                    int randomDamage = Random.Range(10, 30);
                     monster.TakeDamage(randomDamage);
-
-                    // สร้าง AOE Effect
                     Instantiate(aoeDamagePrefab, enemy.transform.position, Quaternion.identity);
-                    Debug.Log("AOE - Monster damaged: " + randomDamage + " at position: " + enemy.transform.position);
                 }
             }
         }
     }
-    else
+
+    private IEnumerator ActivateDPSAura()
     {
-        Debug.Log("No monsters detected in AOE range.");
+        if (dpsAuraEffectPrefab != null)
+        {
+            activeAuraEffect = Instantiate(dpsAuraEffectPrefab, transform.position, Quaternion.identity, transform);
+        }
+
+        float elapsedTime = 0f;
+        float damageInterval = 1f;
+        float damageTimer = 0f;
+
+        int baseDmg = 1 + ((level - 5) / 5) * 10;
+
+        while (elapsedTime < dpsDuration)
+        {
+            damageTimer += Time.deltaTime;
+            elapsedTime += Time.deltaTime;
+
+            if (damageTimer >= damageInterval)
+            {
+                DamageNearbyMonsters(baseDmg);
+                damageTimer = 0f;
+            }
+
+            yield return null;
+        }
+
+        if (activeAuraEffect != null)
+        {
+            Destroy(activeAuraEffect);
+        }
     }
-}
 
-
-
-    private IEnumerator ActivateShield()
+    private void DamageNearbyMonsters(int dmg)
     {
-        hasShield = true;
-        GameObject shield = Instantiate(shieldPrefab, transform.position, Quaternion.identity, transform);
-        yield return new WaitForSeconds(shieldDuration);
-        hasShield = false;
-        Destroy(shield);
+        float damageRadius = 3f;
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, damageRadius);
+
+        foreach (Collider2D enemy in enemies)
+        {
+            if (enemy.CompareTag("Monster"))
+            {
+                Monster monster = enemy.GetComponent<Monster>();
+                if (monster != null)
+                {
+                    monster.TakeDamage(dmg);
+                    Debug.Log("Aura - Damaged monster for " + dmg + " at " + enemy.transform.position);
+                }
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -318,8 +309,13 @@ public class PlayerController : MonoBehaviour
         if (collision.CompareTag("HealthItem"))
         {
             Heal(20);
+            if (healEffectPrefab != null)
+            {
+                Instantiate(healEffectPrefab, transform.position, Quaternion.identity);
+            }
             Destroy(collision.gameObject);
         }
+
 
         if (collision.CompareTag("Coin"))
         {
@@ -372,11 +368,11 @@ public class PlayerController : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        // แสดง Gizmo สำหรับ AOE Radius
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, aoeRadius);
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, singlrRadius);
-        
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, 3f);
     }
 }
