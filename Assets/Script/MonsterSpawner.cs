@@ -50,7 +50,7 @@ public class MonsterSpawner : MonoBehaviour
                 int playerLevel = player.level;
 
                 // ตัวอย่างการสเกล
-                monster.health += playerLevel * 10;   // เพิ่ม HP ตามเลเวล
+                monster.health += playerLevel * 2;   // เพิ่ม HP ตามเลเวล
                 monster.damage += playerLevel * 2;    // เพิ่มดาเมจตามเลเวล
                 
             }
