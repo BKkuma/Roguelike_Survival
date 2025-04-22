@@ -2,8 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using Mono.Data.Sqlite;
-using System.Data;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,7 +13,6 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movement;
     private SQLiteAdapter sqliteAdapter;
-
 
     public int maxHealth = 100;
     public int currentHealth;
@@ -34,25 +31,29 @@ public class PlayerController : MonoBehaviour
     public GameObject aoeDamagePrefab;
     public GameObject singleTargetEffectPrefab;
     public GameObject dpsAuraEffectPrefab;
+    public GameObject healEffectPrefab;
 
-    private float aoeCooldown = 5f;
-    private float singleCooldown = 2f;
-    private float dpsCooldown = 20f;
-    private float dpsDuration = 7f;
+    public float aoeCooldown = 5f;
+    public float singleCooldown = 2f;
+    public float dpsCooldown = 20f;
+    public float dpsDuration = 7f;
+
+    public float aoeRadius = 5f;
+    public float singlrRadius = 10f;
 
     private float aoeTimer = 0f;
     private float singleTimer = 0f;
     private float dpsTimer = 0f;
 
     private GameObject activeAuraEffect;
-    public GameObject healEffectPrefab;
-
-    public float aoeRadius = 5f;
-    public float singlrRadius = 10f;
-    public int aoeDamage = 5;
-
     private float playTime = 0f;
-    public int leveltext = 1;
+
+    // Skill unlock flags
+    public bool aoeUnlocked = false;
+    public bool dpsUnlocked = false;
+    public bool singleUnlocked = false;
+
+    private SkillUpgradeUI skillUpgradeUI;
 
     void Start()
     {
@@ -73,12 +74,11 @@ public class PlayerController : MonoBehaviour
             coins = sqliteAdapter.GetCoinsFromDatabase();
             UpdateCoinUI();
         }
-        else
-        {
-            Debug.LogError("SQLiteAdapter is not assigned in the scene.");
-        }
+
+        skillUpgradeUI = FindObjectOfType<SkillUpgradeUI>();
 
         UpdateLevelUI();
+        
     }
 
     void Update()
@@ -96,25 +96,33 @@ public class PlayerController : MonoBehaviour
         singleTimer += Time.deltaTime;
         dpsTimer += Time.deltaTime;
 
-        if (level >= 7 && aoeTimer >= aoeCooldown)
+        if (aoeUnlocked && aoeTimer >= aoeCooldown)
         {
             ActivateAOEDamage();
             aoeTimer = 0f;
         }
 
-        if (level >= 5 && dpsTimer >= dpsCooldown)
+        if (dpsUnlocked && dpsTimer >= dpsCooldown)
         {
             StartCoroutine(ActivateDPSAura());
             dpsTimer = 0f;
         }
 
-        if (level >= 3 && singleTimer >= singleCooldown)
+        if (singleUnlocked && singleTimer >= singleCooldown)
         {
             ActivateSingleTargetDamage();
             singleTimer = 0f;
         }
 
         playTime += Time.deltaTime;
+        aoeTimer += Time.deltaTime;
+
+        if (aoeUnlocked && aoeTimer >= aoeCooldown)
+        {
+            Debug.Log("Activating AOE");
+            ActivateAOEDamage();
+            aoeTimer = 0f;
+        }
     }
 
     void FixedUpdate()
@@ -141,15 +149,10 @@ public class PlayerController : MonoBehaviour
     {
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        if (healthBar != null)
-        {
-            healthBar.SetHealth(currentHealth);
-        }
+        healthBar?.SetHealth(currentHealth);
 
         if (currentHealth <= 0)
         {
-            Debug.Log("Player Dead!");
             Die();
         }
     }
@@ -158,16 +161,11 @@ public class PlayerController : MonoBehaviour
     {
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        if (healthBar != null)
-        {
-            healthBar.SetHealth(currentHealth);
-        }
+        healthBar?.SetHealth(currentHealth);
     }
 
     private void Die()
     {
-        Debug.Log("Player Dead!");
         PlayerPrefs.SetFloat("FinalTime", playTime);
         PlayerPrefs.SetInt("FinalLevel", level);
         SceneManager.LoadScene("EndGameScene");
@@ -189,43 +187,27 @@ public class PlayerController : MonoBehaviour
         exp -= expToNextLevel;
         maxHealth += 20;
         currentHealth = maxHealth;
-        damage += 5;
+        // damage จะไม่เพิ่มโดยอัตโนมัติอีกต่อไป
         UpdateLevelUI();
     }
 
     private void ActivateSingleTargetDamage()
     {
-        if (level < 3) return;
+        if (!singleUnlocked || skillUpgradeUI == null) return;
 
+        int damage = skillUpgradeUI.GetSingleDamage();
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, singlrRadius);
 
-        if (enemies.Length > 0)
+        foreach (var enemy in enemies)
         {
-            Collider2D selectedEnemy = null;
-
-            foreach (var enemy in enemies)
+            if (enemy.CompareTag("Monster"))
             {
-                if (enemy.CompareTag("Monster"))
-                {
-                    Vector2 directionToMonster = enemy.transform.position - transform.position;
-                    float distanceToMonster = directionToMonster.magnitude;
-
-                    if (distanceToMonster <= singlrRadius)
-                    {
-                        selectedEnemy = enemy;
-                        break;
-                    }
-                }
-            }
-
-            if (selectedEnemy != null)
-            {
-                Monster monster = selectedEnemy.GetComponent<Monster>();
+                Monster monster = enemy.GetComponent<Monster>();
                 if (monster != null)
                 {
-                    int randomDamage = Random.Range(20, 50);
-                    monster.TakeDamage(randomDamage);
-                    Instantiate(singleTargetEffectPrefab, selectedEnemy.transform.position, Quaternion.identity);
+                    monster.TakeDamage(damage);
+                    Instantiate(singleTargetEffectPrefab, enemy.transform.position, Quaternion.identity);
+                    break;
                 }
             }
         }
@@ -233,27 +215,38 @@ public class PlayerController : MonoBehaviour
 
     private void ActivateAOEDamage()
     {
-        if (level < 7) return;
+        Debug.Log("AOE Activated!");
 
+        if (!aoeUnlocked || skillUpgradeUI == null)
+        {
+            Debug.LogWarning("AOE not unlocked or skillUpgradeUI missing");
+            return;
+        }
+
+        int damage = skillUpgradeUI.GetAOEDamage();
         Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
 
-        foreach (Collider2D enemy in enemies)
+        foreach (var enemy in enemies)
         {
             if (enemy.CompareTag("Monster"))
             {
                 Monster monster = enemy.GetComponent<Monster>();
                 if (monster != null)
                 {
-                    int randomDamage = Random.Range(10, 30);
-                    monster.TakeDamage(randomDamage);
+                    monster.TakeDamage(damage);
                     Instantiate(aoeDamagePrefab, enemy.transform.position, Quaternion.identity);
                 }
             }
         }
     }
 
+
     private IEnumerator ActivateDPSAura()
     {
+        if (!dpsUnlocked || skillUpgradeUI == null) yield break;
+
+        int damage = skillUpgradeUI.GetDPSDamage();
+
         if (dpsAuraEffectPrefab != null)
         {
             activeAuraEffect = Instantiate(dpsAuraEffectPrefab, transform.position, Quaternion.identity, transform);
@@ -263,8 +256,6 @@ public class PlayerController : MonoBehaviour
         float damageInterval = 1f;
         float damageTimer = 0f;
 
-        int baseDmg = 1 + ((level - 5) / 5) * 10;
-
         while (elapsedTime < dpsDuration)
         {
             damageTimer += Time.deltaTime;
@@ -272,7 +263,7 @@ public class PlayerController : MonoBehaviour
 
             if (damageTimer >= damageInterval)
             {
-                DamageNearbyMonsters(baseDmg);
+                DamageNearbyMonsters(damage);
                 damageTimer = 0f;
             }
 
@@ -298,7 +289,6 @@ public class PlayerController : MonoBehaviour
                 if (monster != null)
                 {
                     monster.TakeDamage(dmg);
-                    Debug.Log("Aura - Damaged monster for " + dmg + " at " + enemy.transform.position);
                 }
             }
         }
@@ -316,7 +306,6 @@ public class PlayerController : MonoBehaviour
             Destroy(collision.gameObject);
         }
 
-
         if (collision.CompareTag("Coin"))
         {
             coins++;
@@ -329,13 +318,9 @@ public class PlayerController : MonoBehaviour
     private void FlipPlayer()
     {
         if (movement.x > 0)
-        {
             spriteRenderer.flipX = false;
-        }
         else if (movement.x < 0)
-        {
             spriteRenderer.flipX = true;
-        }
     }
 
     private void UpdateCoinUI()
@@ -375,4 +360,20 @@ public class PlayerController : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, 3f);
     }
+
+    public void ResetAOETimer()
+    {
+        aoeTimer = aoeCooldown; // ให้มันพร้อมใช้ทันทีใน frame ถัดไป
+    }
+
+    public void ResetDPSTimer()
+    {
+        dpsTimer = dpsCooldown;
+    }
+
+    public void ResetSingleTimer()
+    {
+        singleTimer = singleCooldown;
+    }
+
 }
