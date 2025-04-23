@@ -206,15 +206,24 @@ public class PlayerController : MonoBehaviour
             if (enemy.CompareTag("Monster"))
             {
                 Monster monster = enemy.GetComponent<Monster>();
+                MonsterType2 monsterType2 = enemy.GetComponent<MonsterType2>();
+
                 if (monster != null)
                 {
                     monster.TakeDamage(damage);
                     Instantiate(singleTargetEffectPrefab, enemy.transform.position, Quaternion.identity);
                     break;
                 }
+                else if (monsterType2 != null)
+                {
+                    monsterType2.TakeDamage(damage);
+                    Instantiate(singleTargetEffectPrefab, enemy.transform.position, Quaternion.identity);
+                    break;
+                }
             }
         }
     }
+
 
     private void ActivateAOEDamage()
     {
@@ -234,14 +243,22 @@ public class PlayerController : MonoBehaviour
             if (enemy.CompareTag("Monster"))
             {
                 Monster monster = enemy.GetComponent<Monster>();
+                MonsterType2 monsterType2 = enemy.GetComponent<MonsterType2>();
+
                 if (monster != null)
                 {
                     monster.TakeDamage(damage);
                     Instantiate(aoeDamagePrefab, enemy.transform.position, Quaternion.identity);
                 }
+                else if (monsterType2 != null)
+                {
+                    monsterType2.TakeDamage(damage);
+                    Instantiate(aoeDamagePrefab, enemy.transform.position, Quaternion.identity);
+                }
             }
         }
     }
+
 
 
     private IEnumerator ActivateDPSAura()
@@ -289,13 +306,20 @@ public class PlayerController : MonoBehaviour
             if (enemy.CompareTag("Monster"))
             {
                 Monster monster = enemy.GetComponent<Monster>();
+                MonsterType2 monsterType2 = enemy.GetComponent<MonsterType2>();
+
                 if (monster != null)
                 {
                     monster.TakeDamage(dmg);
                 }
+                else if (monsterType2 != null)
+                {
+                    monsterType2.TakeDamage(dmg);
+                }
             }
         }
     }
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

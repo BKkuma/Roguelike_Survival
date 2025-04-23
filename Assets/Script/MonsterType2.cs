@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class Monster : MonoBehaviour, IDamageable
+public class MonsterType2 : MonoBehaviour, IDamageable
 {
-    public int health = 20;
+    public int health = 50;
     public GameObject coinPrefab;
     public GameObject[] itemPrefabs;
     public float itemDropChance = 0.3f;
     public float speed = 2f;
-    public int damage = 10;
+    public int damage = 20;
     public float damageInterval = 1f;
     private float damageTimer = 0f;
     private Transform target;
@@ -60,6 +60,7 @@ public class Monster : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
+        Debug.Log("MonsterType2 โดนตีแล้ว: -" + damage);
         health -= damage;
         if (health <= 0)
         {
@@ -72,7 +73,7 @@ public class Monster : MonoBehaviour, IDamageable
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
-            player.GainEXP(10);
+            player.GainEXP(50);
         }
 
         Instantiate(coinPrefab, transform.position, Quaternion.identity);

@@ -17,26 +17,21 @@ public class Projectile : MonoBehaviour
             damage = player.damage;
         }
 
-        if (isSpecialBullet) // ถ้าเป็นกระสุนพิเศษ
-        {
-            damage *= 2;  // เพิ่มดาเมจ 2 เท่า
-        }
+        
 
         GetComponent<Rigidbody2D>().velocity = transform.right * speed;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Monster"))
+        IDamageable target = collision.GetComponent<IDamageable>();
+        if (target != null)
         {
-            Monster monster = collision.GetComponent<Monster>();
-            if (monster != null)
-            {
-                monster.TakeDamage(damage);
-            }
+            target.TakeDamage(damage);
             Destroy(gameObject);
         }
     }
+
 
     void OnBecameInvisible()
     {

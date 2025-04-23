@@ -5,6 +5,7 @@ using UnityEngine;
 public class MonsterSpawner : MonoBehaviour
 {
     public GameObject monsterPrefab; // Prefab ของมอนสเตอร์
+    public GameObject monsterPrefab2;
     public float spawnInterval = 5f; // ระยะเวลาการเกิดของมอนสเตอร์
     public int maxMonsters = 10; // จำนวนมอนสเตอร์สูงสุดในฉาก
     public float spawnDistanceFromCamera = 2f; // ระยะห่างจากขอบจอที่จะเกิดมอนสเตอร์
@@ -37,22 +38,32 @@ public class MonsterSpawner : MonoBehaviour
     private void SpawnMonster()
     {
         Vector3 spawnPosition = GetRandomPositionOutsideCamera();
-        GameObject monsterGO = Instantiate(monsterPrefab, spawnPosition, Quaternion.identity);
+        GameObject prefabToSpawn = monsterPrefab; // เริ่มจากตัวธรรมดา
+
+        PlayerController player = FindObjectOfType<PlayerController>();
+        int playerLevel = player != null ? player.level : 1;
+        float gameTime = Time.timeSinceLevelLoad;
+
+        // เงื่อนไข spawn ตัวที่ 2:
+        if (playerLevel >= 10 || gameTime > 60f) // เลเวล 5 หรือเล่นเกิน 60 วิ
+        {
+            if (Random.value < 0.2f) // 20% โอกาส spawn ตัวที่ 2
+            {
+                prefabToSpawn = monsterPrefab2;
+            }
+        }
+
+        GameObject monsterGO = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
         currentMonsterCount++;
 
-        // เพิ่มความสามารถให้มอนสเตอร์ตามเลเวลผู้เล่น
-        PlayerController player = FindObjectOfType<PlayerController>();
+        // ปรับค่าพลังตามเลเวลผู้เล่น
         if (player != null)
         {
             Monster monster = monsterGO.GetComponent<Monster>();
             if (monster != null)
             {
-                int playerLevel = player.level;
-
-                // ตัวอย่างการสเกล
-                monster.health += playerLevel * 2;   // เพิ่ม HP ตามเลเวล
-                monster.damage += playerLevel * 2;    // เพิ่มดาเมจตามเลเวล
-                
+                monster.health += playerLevel * 2;
+                monster.damage += playerLevel * 2;
             }
         }
     }
