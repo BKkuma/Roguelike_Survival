@@ -366,20 +366,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2c5f7c1dcf577a4da9553fc92ba0fd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panel: {fileID: 1154204305}
+  player: {fileID: 1130909329}
+  skillPanel: {fileID: 1154204305}
+  aoeUpgradeButton: {fileID: 1414937035}
   aoeText: {fileID: 350293269}
-  singleText: {fileID: 574579093}
-  dpsText: {fileID: 1242444015}
-  aoeButton: {fileID: 1414937035}
-  singleButton: {fileID: 906889495}
-  dpsButton: {fileID: 1589575436}
+  aoeButtonText: {fileID: 1877273993}
   aoeLevel: 0
+  aoeMaxLevel: 20
+  aoeUpgradeCost: 1
+  baseAOEDamage: 20
+  singleUpgradeButton: {fileID: 906889495}
+  singleText: {fileID: 574579093}
+  singleButtonText: {fileID: 707863888}
   singleLevel: 0
+  singleMaxLevel: 20
+  singleUpgradeCost: 15
+  baseSingleDamage: 30
+  dpsUpgradeButton: {fileID: 1589575436}
+  dpsText: {fileID: 1242444015}
+  dpsButtonText: {fileID: 594100578}
   dpsLevel: 0
-  aoeBaseDamage: 10
-  singleBaseDamage: 20
-  dpsBaseDamage: 5
-  coinCostPerUpgrade: 10
+  dpsMaxLevel: 20
+  dpsUpgradeCost: 20
+  baseDPSDamage: 10
 --- !u!4 &78844419
 Transform:
   m_ObjectHideFlags: 0
@@ -897,8 +906,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 20
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -1420,8 +1429,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 20
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -1518,8 +1527,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 25
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -1679,8 +1688,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 25
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -1736,8 +1745,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 200, y: 15}
-  m_SizeDelta: {x: -546, y: -368}
+  m_AnchoredPosition: {x: 200.3, y: -8.4}
+  m_SizeDelta: {x: -538.4501, y: -332.76}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &906889493
 MonoBehaviour:
@@ -7575,7 +7584,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1154204306
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7706,8 +7715,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 20
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -8014,8 +8023,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -225, y: 15}
-  m_SizeDelta: {x: -546, y: -368}
+  m_AnchoredPosition: {x: -240.66, y: -8.4}
+  m_SizeDelta: {x: -534.9846, y: -344.317}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1414937033
 MonoBehaviour:
@@ -8282,8 +8291,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7, y: 15}
-  m_SizeDelta: {x: -546, y: -368}
+  m_AnchoredPosition: {x: -8, y: -8.399994}
+  m_SizeDelta: {x: -535.0182, y: -340}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1589575436
 MonoBehaviour:
@@ -8799,8 +8808,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: e715fcabbb6163e48b780b3b92979f8e, type: 3}
-    m_FontSize: 25
+    m_Font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+    m_FontSize: 16
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10

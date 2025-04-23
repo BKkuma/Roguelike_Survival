@@ -3,148 +3,169 @@ using UnityEngine.UI;
 
 public class SkillUpgradeUI : MonoBehaviour
 {
-    public GameObject panel;
-    public Text aoeText, singleText, dpsText;
-    public Button aoeButton, singleButton, dpsButton;
+    public PlayerController player;
 
+    [Header("UI References")]
+    public GameObject skillPanel;
+
+    [Header("AOE Skill")]
+    public Button aoeUpgradeButton;
+    public Text aoeText;
+    public Text aoeButtonText;
     public int aoeLevel = 0;
+    public int aoeMaxLevel = 20;
+    public int aoeUpgradeCost = 10;
+    public int baseAOEDamage = 20;
+
+    [Header("Single Target Skill")]
+    public Button singleUpgradeButton;
+    public Text singleText;
+    public Text singleButtonText;
     public int singleLevel = 0;
+    public int singleMaxLevel = 20;
+    public int singleUpgradeCost = 15;
+    public int baseSingleDamage = 30;
+
+    [Header("DPS Aura Skill")]
+    public Button dpsUpgradeButton;
+    public Text dpsText;
+    public Text dpsButtonText;
     public int dpsLevel = 0;
-
-    public int aoeBaseDamage = 10;
-    public int singleBaseDamage = 20;
-    public int dpsBaseDamage = 5;
-
-    public int coinCostPerUpgrade = 10;
-
-    private PlayerController player;
+    public int dpsMaxLevel = 20;
+    public int dpsUpgradeCost = 20;
+    public int baseDPSDamage = 10;
 
     void Start()
     {
-        player = FindObjectOfType<PlayerController>();
-        panel.SetActive(false);
-
-        aoeButton.onClick.AddListener(() =>
-        {
-            if (!player.aoeUnlocked)
-                UpgradeAOE();
-            else
-                UpgradeSkill(ref aoeLevel);
-        });
-
-        singleButton.onClick.AddListener(() =>
-        {
-            if (!player.singleUnlocked)
-                UpgradeSingle();
-            else
-                UpgradeSkill(ref singleLevel);
-        });
-
-        dpsButton.onClick.AddListener(() =>
-        {
-            if (!player.dpsUnlocked)
-                UpgradeDPS();
-            else
-                UpgradeSkill(ref dpsLevel);
-        });
-
         UpdateUI();
-    }
 
+        aoeUpgradeButton.onClick.AddListener(UpgradeAOE);
+        singleUpgradeButton.onClick.AddListener(UpgradeSingle);
+        dpsUpgradeButton.onClick.AddListener(UpgradeDPS);
+
+        skillPanel.SetActive(false);
+    }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            bool isOpen = !panel.activeSelf;
-            panel.SetActive(isOpen);
-            Time.timeScale = isOpen ? 0f : 1f;
-            UpdateUI();
+            ToggleSkillPanel();
         }
     }
 
-    void UpgradeSkill(ref int level)
+    public void ToggleSkillPanel()
     {
-        if (player.coins >= coinCostPerUpgrade)
-        {
-            player.coins -= coinCostPerUpgrade;
-            level++;
-            player.SendMessage("UpdateCoinUI");
-            player.SendMessage("UpdateCoinDatabase");
-            UpdateUI();
-        }
+        skillPanel.SetActive(!skillPanel.activeSelf);
+        UpdateUI();
     }
-
-    void UpdateUI()
-    {
-        aoeText.text = player.aoeUnlocked
-            ? $"AOE Skill: Damage {GetAOEDamage()}"
-            : "AOE Skill: Locked";
-        aoeButton.GetComponentInChildren<Text>().text = player.aoeUnlocked
-            ? $"Upgrade ({coinCostPerUpgrade} Coins)"
-            : "Unlock (5 Coins)";
-
-        singleText.text = player.singleUnlocked
-            ? $"Single Skill: Damage {GetSingleDamage()}"
-            : "Single Skill: Locked";
-        singleButton.GetComponentInChildren<Text>().text = player.singleUnlocked
-            ? $"Upgrade ({coinCostPerUpgrade} Coins)"
-            : "Unlock (8 Coins)";
-
-        dpsText.text = player.dpsUnlocked
-            ? $"DPS Aura: Damage {GetDPSDamage()}"
-            : "DPS Aura: Locked";
-        dpsButton.GetComponentInChildren<Text>().text = player.dpsUnlocked
-            ? $"Upgrade ({coinCostPerUpgrade} Coins)"
-            : "Unlock (10 Coins)";
-    }
-
-
-    public int GetAOEDamage() => aoeBaseDamage + aoeLevel * 10;
-    public int GetSingleDamage() => singleBaseDamage + singleLevel * 10;
-    public int GetDPSDamage() => dpsBaseDamage + dpsLevel * 10;
 
     void UpgradeAOE()
     {
-        if (!player.aoeUnlocked && player.coins >= 5)
+        if (aoeLevel < aoeMaxLevel && player.coins >= aoeUpgradeCost)
         {
-            player.coins -= 5;
+            aoeLevel++;
+            player.coins -= aoeUpgradeCost;
+            player.UpdateCoinUI();
             player.aoeUnlocked = true;
-            Debug.Log("AOE Skill unlocked!");
-            player.SendMessage("UpdateCoinUI");
-            player.SendMessage("UpdateCoinDatabase");
-            UpdateUI();
-        }
-    }
-
-    void UpgradeDPS()
-    {
-        if (!player.dpsUnlocked && player.coins >= 10)
-        {
-            player.coins -= 10;
-            player.dpsUnlocked = true;
-            player.SendMessage("UpdateCoinUI");
-            player.SendMessage("UpdateCoinDatabase");
-
-            player.SendMessage("ResetDPSTimer");
-
             UpdateUI();
         }
     }
 
     void UpgradeSingle()
     {
-        if (!player.singleUnlocked && player.coins >= 8)
+        if (singleLevel < singleMaxLevel && player.coins >= singleUpgradeCost)
         {
-            player.coins -= 8;
+            singleLevel++;
+            player.coins -= singleUpgradeCost;
+            player.UpdateCoinUI();
             player.singleUnlocked = true;
-            player.SendMessage("UpdateCoinUI");
-            player.SendMessage("UpdateCoinDatabase");
-
-            player.SendMessage("ResetSingleTimer");
-
             UpdateUI();
         }
     }
 
+    void UpgradeDPS()
+    {
+        if (dpsLevel < dpsMaxLevel && player.coins >= dpsUpgradeCost)
+        {
+            dpsLevel++;
+            player.coins -= dpsUpgradeCost;
+            player.UpdateCoinUI();
+            player.dpsUnlocked = true;
+            UpdateUI();
+        }
+    }
+
+    void UpdateUI()
+    {
+        // AOE
+        if (aoeLevel == 0)
+        {
+            aoeText.text = "Unlock";
+            aoeButtonText.text = $"Unlock ({aoeUpgradeCost}💰)";
+        }
+        else if (aoeLevel >= aoeMaxLevel)
+        {
+            aoeText.text = $"AOE Lv. MAX - Dmg: {GetAOEDamage()}";
+            aoeButtonText.text = "MAX";
+        }
+        else
+        {
+            aoeText.text = $"AOE Lv. {aoeLevel}/{aoeMaxLevel} - Dmg: {GetAOEDamage()}";
+            aoeButtonText.text = $"Upgrade ({aoeUpgradeCost}💰)";
+        }
+        aoeUpgradeButton.interactable = aoeLevel < aoeMaxLevel;
+
+        // Single Target
+        if (singleLevel == 0)
+        {
+            singleText.text = "Unlock";
+            singleButtonText.text = $"Unlock ({singleUpgradeCost}💰)";
+        }
+        else if (singleLevel >= singleMaxLevel)
+        {
+            singleText.text = $"Single Lv. MAX - Dmg: {GetSingleDamage()}";
+            singleButtonText.text = "MAX";
+        }
+        else
+        {
+            singleText.text = $"Single Lv. {singleLevel}/{singleMaxLevel} - Dmg: {GetSingleDamage()}";
+            singleButtonText.text = $"Upgrade ({singleUpgradeCost}💰)";
+        }
+        singleUpgradeButton.interactable = singleLevel < singleMaxLevel;
+
+        // DPS Aura
+        if (dpsLevel == 0)
+        {
+            dpsText.text = "Unlock";
+            dpsButtonText.text = $"Unlock ({dpsUpgradeCost}💰)";
+        }
+        else if (dpsLevel >= dpsMaxLevel)
+        {
+            dpsText.text = $"DPS Lv. MAX - Dmg: {GetDPSDamage()}";
+            dpsButtonText.text = "MAX";
+        }
+        else
+        {
+            dpsText.text = $"DPS Lv. {dpsLevel}/{dpsMaxLevel} - Dmg: {GetDPSDamage()}";
+            dpsButtonText.text = $"Upgrade ({dpsUpgradeCost}💰)";
+        }
+        dpsUpgradeButton.interactable = dpsLevel < dpsMaxLevel;
+    }
+
+
+    public int GetAOEDamage()
+    {
+        return baseAOEDamage + (aoeLevel * 10);
+    }
+
+    public int GetSingleDamage()
+    {
+        return baseSingleDamage + (singleLevel * 10);
+    }
+
+    public int GetDPSDamage()
+    {
+        return baseDPSDamage + (dpsLevel * 5);
+    }
 }

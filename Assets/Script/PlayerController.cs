@@ -326,7 +326,7 @@ public class PlayerController : MonoBehaviour
             spriteRenderer.flipX = true;
     }
 
-    private void UpdateCoinUI()
+    public void UpdateCoinUI()
     {
         if (coinText != null)
         {
