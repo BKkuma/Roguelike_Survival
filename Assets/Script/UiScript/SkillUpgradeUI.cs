@@ -56,7 +56,12 @@ public class SkillUpgradeUI : MonoBehaviour
 
     public void ToggleSkillPanel()
     {
-        skillPanel.SetActive(!skillPanel.activeSelf);
+        bool isActive = !skillPanel.activeSelf;
+        skillPanel.SetActive(isActive);
+
+        // หยุดหรือเล่นเกมตามการเปิด/ปิดของ Panel
+        Time.timeScale = isActive ? 0f : 1f; // เมื่อเปิด Panel หยุดเวลา (Time scale = 0) เมื่อปิด Panel กลับมาเล่น (Time scale = 1)
+
         UpdateUI();
     }
 
@@ -66,7 +71,7 @@ public class SkillUpgradeUI : MonoBehaviour
         {
             aoeLevel++;
             player.coins -= aoeUpgradeCost;
-            player.UpdateCoinUI();
+            player.UpdateCoinUI(); // เรียก UpdateCoinUI() เพื่ออัปเดต UI ของจำนวน coin
             player.aoeUnlocked = true;
             UpdateUI();
         }
@@ -78,7 +83,7 @@ public class SkillUpgradeUI : MonoBehaviour
         {
             singleLevel++;
             player.coins -= singleUpgradeCost;
-            player.UpdateCoinUI();
+            player.UpdateCoinUI(); // เรียก UpdateCoinUI() เพื่ออัปเดต UI ของจำนวน coin
             player.singleUnlocked = true;
             UpdateUI();
         }
@@ -90,11 +95,12 @@ public class SkillUpgradeUI : MonoBehaviour
         {
             dpsLevel++;
             player.coins -= dpsUpgradeCost;
-            player.UpdateCoinUI();
+            player.UpdateCoinUI(); // เรียก UpdateCoinUI() เพื่ออัปเดต UI ของจำนวน coin
             player.dpsUnlocked = true;
             UpdateUI();
         }
     }
+
 
     void UpdateUI()
     {
