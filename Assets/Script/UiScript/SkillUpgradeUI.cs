@@ -112,12 +112,12 @@ public class SkillUpgradeUI : MonoBehaviour
         }
         else if (aoeLevel >= aoeMaxLevel)
         {
-            aoeText.text = $"AOE Lv. MAX - Dmg: {GetAOEDamage()}";
+            aoeText.text = $"Lv. MAX - Dmg: {GetAOEDamage()}";
             aoeButtonText.text = "MAX";
         }
         else
         {
-            aoeText.text = $"AOE Lv. {aoeLevel}/{aoeMaxLevel} - Dmg: {GetAOEDamage()}";
+            aoeText.text = $"Lv. {aoeLevel}/{aoeMaxLevel} - Dmg: {GetAOEDamage()}";
             aoeButtonText.text = $"Upgrade ({aoeUpgradeCost}💰)";
         }
         aoeUpgradeButton.interactable = aoeLevel < aoeMaxLevel;
@@ -130,12 +130,12 @@ public class SkillUpgradeUI : MonoBehaviour
         }
         else if (singleLevel >= singleMaxLevel)
         {
-            singleText.text = $"Single Lv. MAX - Dmg: {GetSingleDamage()}";
+            singleText.text = $"Lv.MAX - Dmg: {GetSingleDamage()}";
             singleButtonText.text = "MAX";
         }
         else
         {
-            singleText.text = $"Single Lv. {singleLevel}/{singleMaxLevel} - Dmg: {GetSingleDamage()}";
+            singleText.text = $"Lv.{singleLevel}/{singleMaxLevel} -Dmg:{GetSingleDamage()}";
             singleButtonText.text = $"Upgrade ({singleUpgradeCost}💰)";
         }
         singleUpgradeButton.interactable = singleLevel < singleMaxLevel;
@@ -148,12 +148,12 @@ public class SkillUpgradeUI : MonoBehaviour
         }
         else if (dpsLevel >= dpsMaxLevel)
         {
-            dpsText.text = $"DPS Lv. MAX - Dmg: {GetDPSDamage()}";
+            dpsText.text = $"Lv. MAX - Dmg: {GetDPSDamage()}";
             dpsButtonText.text = "MAX";
         }
         else
         {
-            dpsText.text = $"DPS Lv. {dpsLevel}/{dpsMaxLevel} - Dmg: {GetDPSDamage()}";
+            dpsText.text = $"Lv. {dpsLevel}/{dpsMaxLevel} - Dmg: {GetDPSDamage()}";
             dpsButtonText.text = $"Upgrade ({dpsUpgradeCost}💰)";
         }
         dpsUpgradeButton.interactable = dpsLevel < dpsMaxLevel;
